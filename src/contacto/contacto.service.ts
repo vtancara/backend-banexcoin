@@ -10,10 +10,10 @@ export class ContactoService {
     private contactoRepository: Repository<Contacto>,
   ) {}
 
-  listar() {
+  obtenerContactos(idUsuario: number) {
     return this.contactoRepository.find({
+      where: { idUsuario },
       relations: {
-        usuario: true,
         contacto: true,
       },
     });

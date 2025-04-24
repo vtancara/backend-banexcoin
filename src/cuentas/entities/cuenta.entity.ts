@@ -1,3 +1,4 @@
+import { Contacto } from '../../contacto/entities/contacto.entity';
 import { Comision } from '../../comisiones/entities/comision.entity';
 import { Transaccion } from '../../transacciones/entities/transaccion.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
@@ -46,4 +47,7 @@ export class Cuenta {
 
   @OneToMany(() => Comision, (comision) => comision.cuenta)
   comisiones: Comision[];
+
+  @OneToMany(() => Contacto, (contacto) => contacto.cuenta)
+  contacto: Contacto;
 }

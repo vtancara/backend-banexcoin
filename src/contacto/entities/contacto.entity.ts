@@ -1,3 +1,4 @@
+import { Cuenta } from '../../cuentas/entities/cuenta.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
 import {
   Column,
@@ -21,6 +22,9 @@ export class Contacto {
   @Column({ name: 'id_contacto' })
   idContacto: number;
 
+  @Column({ name: 'id_cuenta' })
+  idCuenta: number;
+
   @ManyToOne(() => Usuario, (usuario) => usuario.id)
   @JoinColumn({ name: 'id_usuario' })
   usuario: Usuario;
@@ -28,4 +32,8 @@ export class Contacto {
   @ManyToOne(() => Usuario, (usuario) => usuario.contactos)
   @JoinColumn({ name: 'id_contacto' })
   contacto: Usuario;
+
+  @ManyToOne(() => Cuenta, (cuenta) => cuenta.contacto)
+  @JoinColumn({ name: 'id_cuenta' })
+  cuenta: Cuenta;
 }

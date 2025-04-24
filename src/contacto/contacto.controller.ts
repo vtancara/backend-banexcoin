@@ -1,11 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ContactoService } from './contacto.service';
 
-@Controller('contacto')
-export class CuentaController {
+@Controller('contactos')
+export class ContactoController {
   constructor(private readonly contactoService: ContactoService) {}
-  @Get()
-  listar() {
-    return this.contactoService.listar();
+  @Get('usuario/:idUsuario')
+  obtenerContactos(@Param('idUsuario') idUsuario: number) {
+    return this.contactoService.obtenerContactos(idUsuario);
   }
 }

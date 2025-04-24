@@ -8,8 +8,8 @@ AppDataSource.initialize()
   .then(async () => {
     console.log('🚀 Base de datos conectada');
     await seedUsers(AppDataSource);
-    await seedContacto(AppDataSource);
     await seedCuenta(AppDataSource);
+    await seedContacto(AppDataSource);
     console.log('🌱 Seed finalizado');
     process.exit(0);
   })
