@@ -15,6 +15,7 @@ export class ContactoService {
       where: { idUsuario },
       relations: {
         contacto: true,
+        cuenta: true,
       },
     });
   }

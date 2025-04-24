@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './usuarios/usuario.module';
@@ -21,8 +21,13 @@ import { ContactoModule } from './contacto/contacto.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return configService.get('database');
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+        const databaseConfig =
+          configService.get<TypeOrmModuleOptions>('database');
+        if (!databaseConfig) {
+          throw new Error('Database configuration is not defined');
+        }
+        return databaseConfig;
       },
     }),
     UsersModule,
