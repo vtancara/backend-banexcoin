@@ -7,6 +7,7 @@ import { UsersModule } from './usuarios/usuario.module';
 import { CuentaModule } from './cuentas/cuenta.module';
 import databaseConfig from '../database/config';
 import { ContactoModule } from './contactos/contacto.module';
+import { TransaccionModule } from './transacciones/transaccion.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ContactoModule } from './contactos/contacto.module';
     UsersModule,
     CuentaModule,
     ContactoModule,
+    TransaccionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

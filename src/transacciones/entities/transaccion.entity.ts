@@ -35,5 +35,5 @@ export class Transaccion {
   cuentaDestino: Cuenta;
 
   @OneToMany(() => Comision, (comision) => comision.transaccion)
-  comisiones: Comision[];
+  comision: Comision;
 }

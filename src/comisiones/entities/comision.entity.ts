@@ -25,7 +25,7 @@ export class Comision {
   @Column({ name: 'id_cuenta_beneficiaria' })
   idCuentaBeneficiaria: number;
 
-  @ManyToOne(() => Transaccion, (transaccion) => transaccion.comisiones)
+  @ManyToOne(() => Transaccion, (transaccion) => transaccion.comision)
   @JoinColumn({ name: 'id_transaccion' })
   transaccion: Transaccion;
 

@@ -4,11 +4,11 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
-import { Cuenta } from '../cuentas/entities/cuenta.entity';
+import { ComisionService } from 'src/comisiones/comision.service';
+import { CuentaService } from 'src/cuentas/cuenta.service';
+import { DataSource, Repository } from 'typeorm';
 import { Transaccion } from './entities/transaccion.entity';
-import { Comision } from '../comisiones/entities/comision.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TransaccionService {
@@ -16,16 +16,11 @@ export class TransaccionService {
   private readonly PORCENTAJE_COMISION = 0.01;
 
   constructor(
-    @InjectRepository(Cuenta)
-    private cuentasRepository: Repository<Cuenta>,
-
+    private dataSource: DataSource,
+    private cuentasService: CuentaService,
+    private comisionesService: ComisionService,
     @InjectRepository(Transaccion)
     private transferenciasRepository: Repository<Transaccion>,
-
-    @InjectRepository(Comision)
-    private comisionesRepository: Repository<Comision>,
-
-    private dataSource: DataSource,
   ) {}
 
   /**
@@ -56,56 +51,58 @@ export class TransaccionService {
     await queryRunner.startTransaction();
 
     try {
-      // Obtenemos las cuentas con bloqueo para evitar condiciones de carrera
-      const cuentaOrigen = await queryRunner.manager.findOne(Cuenta, {
-        where: { id: idCuentaOrigen },
-        lock: { mode: 'pessimistic_write' }, // Bloqueo para evitar transferencias simultáneas inconsistentes
-      });
+      const transactionManager = queryRunner.manager;
 
-      if (!cuentaOrigen) {
-        throw new BadRequestException('Cuenta de origen no encontrada');
-      }
+      // Verificamos si las cuentas existen antes de bloquearlas
+      await this.cuentasService.verificarCuentasExisten([
+        idCuentaOrigen,
+        idCuentaDestino,
+      ]);
 
-      const cuentaDestino = await queryRunner.manager.findOne(Cuenta, {
-        where: { id: idCuentaDestino },
-        lock: { mode: 'pessimistic_write' },
-      });
+      // Obtenemos las cuentas con bloqueo (delegamos al servicio de cuentas)
+      const cuentaOrigen = await this.cuentasService.obtenerCuentaConBloqueo(
+        transactionManager,
+        idCuentaOrigen,
+      );
+      const cuentaDestino = await this.cuentasService.obtenerCuentaConBloqueo(
+        transactionManager,
+        idCuentaDestino,
+      );
 
-      if (!cuentaDestino) {
-        throw new BadRequestException('Cuenta de destino no encontrada');
-      }
-
-      // Verificar si hay fondos suficientes (considerando la comisión)
-      if (cuentaOrigen.saldo < totalADescontar) {
+      // Verificar si hay fondos suficientes (delegamos al servicio de cuentas)
+      if (
+        !this.cuentasService.tieneSaldoSuficiente(cuentaOrigen, totalADescontar)
+      ) {
         throw new BadRequestException(
           'Fondos insuficientes para realizar la transferencia',
         );
       }
 
-      // Actualizar saldos
-      cuentaOrigen.saldo -= totalADescontar;
-      cuentaDestino.saldo += monto;
-
-      // Guardar los cambios en las cuentas
-      await queryRunner.manager.save(cuentaOrigen);
-      await queryRunner.manager.save(cuentaDestino);
+      // Actualizar saldos de las cuentas (delegamos al servicio de cuentas)
+      const cuentasActualizadas =
+        await this.cuentasService.procesarTransferencia(
+          transactionManager,
+          cuentaOrigen,
+          cuentaDestino,
+          monto,
+          valorComision,
+        );
 
       // Registrar la transferencia
       const transferencia = new Transaccion();
-      transferencia.cuentaOrigen = cuentaOrigen;
-      transferencia.cuentaDestino = cuentaDestino;
+      transferencia.cuentaOrigen = cuentasActualizadas.cuentaOrigen;
+      transferencia.cuentaDestino = cuentasActualizadas.cuentaDestino;
       transferencia.monto = monto;
       transferencia.fechaHora = new Date();
       const transferenciaGuardada =
-        await queryRunner.manager.save(transferencia);
+        await transactionManager.save(transferencia);
 
-      // Registrar la comisión
-      const comision = new Comision();
-      comision.idTransaccion = transferenciaGuardada.id;
-      comision.monto = valorComision;
-      comision.fechaHora = new Date();
-      comision.idCuentaBeneficiaria = idCuentaDestino;
-      await queryRunner.manager.save(comision);
+      // Registrar la comisión (delegamos al servicio de comisiones)
+      await this.comisionesService.crearComision(
+        transactionManager,
+        transferenciaGuardada,
+        valorComision,
+      );
 
       // Confirmar la transacción
       await queryRunner.commitTransaction();
@@ -119,15 +116,34 @@ export class TransaccionService {
         throw error;
       }
 
+      // Mejor manejo del error
       const errorMessage =
         error instanceof Error ? error.message : 'Error desconocido';
 
+      console.error('Error en transferencia:', error);
+
       throw new InternalServerErrorException(
-        'Error al procesar la transferencia: ' + errorMessage,
+        `Error al procesar la transferencia: ${errorMessage}`,
       );
     } finally {
       // Liberar el queryRunner
       await queryRunner.release();
     }
+  }
+
+  async obtenerTransferenciasEnviadas(idCuenta: number) {
+    return this.transferenciasRepository.find({
+      where: { cuentaOrigen: { id: idCuenta } },
+      relations: ['cuentaOrigen', 'cuentaDestino', 'comision'],
+      order: { fechaHora: 'DESC' },
+    });
+  }
+
+  async obtenerTransferenciasRecibidas(idCuenta: number) {
+    return this.transferenciasRepository.find({
+      where: { cuentaDestino: { id: idCuenta } },
+      relations: ['cuentaOrigen', 'cuentaDestino'],
+      order: { fechaHora: 'DESC' },
+    });
   }
 }
