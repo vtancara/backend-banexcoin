@@ -65,7 +65,7 @@ export class CuentaService {
   ): Promise<Cuenta> {
     const cuenta = await entityManager.findOne(Cuenta, {
       where: { id: idCuenta },
-      lock: { mode: 'pessimistic_write' },
+      lock: { mode: 'pessimistic_write' }, // Bloqueo para evitar transacciones simultáneas
     });
 
     if (!cuenta) {
