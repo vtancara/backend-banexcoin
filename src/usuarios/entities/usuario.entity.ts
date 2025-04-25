@@ -1,4 +1,4 @@
-import { Contacto } from '../../contacto/entities/contacto.entity';
+import { Contacto } from '../../contactos/entities/contacto.entity';
 import { Cuenta } from '../../cuentas/entities/cuenta.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 

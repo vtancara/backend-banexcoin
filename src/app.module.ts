@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './usuarios/usuario.module';
 import { CuentaModule } from './cuentas/cuenta.module';
 import databaseConfig from '../database/config';
-import { ContactoModule } from './contacto/contacto.module';
+import { ContactoModule } from './contactos/contacto.module';
 
 @Module({
   imports: [

@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { Contacto } from 'src/contacto/entities/contacto.entity';
+import { Contacto } from 'src/contactos/entities/contacto.entity';
 
 export const seedContacto = async (dataSource: DataSource) => {
   const contactoRepository = dataSource.getRepository(Contacto);

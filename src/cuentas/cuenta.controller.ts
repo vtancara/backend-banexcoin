@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { CuentaService } from './cuenta.service';
 
 @Controller('cuentas')
@@ -7,7 +7,6 @@ export class CuentaController {
 
   @Get('/usuario/:idUsuario')
   obtenerCuentas(@Param('idUsuario') idUsuario: number) {
-    console.log('CONTROLLER_OBTENER_CUENETAS', idUsuario);
     return this.cuentaService.obtenerCuentas(idUsuario);
   }
 

@@ -1,4 +1,4 @@
-import { Contacto } from '../../contacto/entities/contacto.entity';
+import { Contacto } from '../../contactos/entities/contacto.entity';
 import { Comision } from '../../comisiones/entities/comision.entity';
 import { Transaccion } from '../../transacciones/entities/transaccion.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';

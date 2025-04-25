@@ -13,11 +13,14 @@ export class Comision {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'date' })
-  fecha: Date;
-
   @Column({ name: 'id_transaccion' })
   idTransaccion: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  monto: number;
+
+  @Column({ type: 'timestamp' })
+  fechaHora: Date;
 
   @Column({ name: 'id_cuenta_beneficiaria' })
   idCuentaBeneficiaria: number;
