@@ -4,6 +4,11 @@
 
 Cada transacción genera comisiones para quien te recomendó. ¡Únete y comienza a ganar!
 
+### Capturas de la aplicación:
+<img src="docs/images/captura-inicio.png" alt="Dashboard" width="500"/>
+<img src="docs/images/captura-bandeja.png" alt="bandeja" width="500"/>
+<img src="docs/images/captura-transferencia.png" alt="transferencia" width="500"/>
+<img src="docs/images/captura-detalle.png" alt="detalle" width="500"/>
 
 ### Explicación de la solución:
 
